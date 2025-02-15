@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mijn Dashboard</title>
+    <script async defer src="https://apis.google.com/js/api.js"></script>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%); /* Rustige blauwe achtergrond */
+            color: #333;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #3e2723; /* Diepere kleur voor een gezinsgevoel */
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        button {
+            background-color: #4caf50; /* Aangename groen */
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #66bb6a;
+        }
+
+        /* Login Page */
+        #login {
+            display: block;
+            padding: 30px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Dashboard */
+        #dashboard {
+            display: none;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            justify-content: center;
+            align-items: start;
+        }
+
+        .tile {
+            background: #ffffff;
+            color: #333;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: left;
+            position: relative;
+        }
+
+        .tile:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #388e3c; /* Groene accentkleur */
+        }
+
+        p {
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        /* Chores Section */
+        .chores-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            background: #f1f8e9;
+            border-radius: 10px;
+            overflow-y: auto;
+            max-height: 100px;
+        }
+
+        .chores-list li {
+            padding: 15px;
+            margin: 5px;
+            background-color: #c8e6c9;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .chores-list li:hover {
+            background-color: #81c784;
+            transform: translateX(5px);
+        }
+
+        .chores-list li .delete {
+            color: #ff4d4d;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #ccc;
+            width: 80%;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .add-chore-btn {
+            background-color: #4caf50;
+            border: none;
+            padding: 10px 20px;
+            color: white;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 80%;
+            transition: background-color 0.3s;
+        }
+
+        .add-chore-btn:hover {
+            background-color: #66bb6a;
+        }
+
+        /* Weather Section */
+        .weather {
+            background-color: #ffcc80;
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .weather h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .weather p {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .weather .icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        /* Schedule Section */
+        .schedule {
+            background-color: #80deea;
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .schedule p {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        /* Grid Layout with Calendar on the Right */
+        .container {
+            grid-template-columns: 1fr 1fr 1fr; /* Three columns layout */
+            grid-template-areas: 
+                "weather chores calendar"
+                "weather chores calendar"
+                "weather chores calendar";
+        }
+
+        #googleCalendar {
+            grid-area: calendar; /* Align the calendar to the far right */
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login">
+        <h1>Log in op je Dashboard 😎</h1>
+        <button onclick="checkPassword()">Inloggen 🔑</button>
+    </div>
+
+    <div id="dashboard" class="hidden">
+        <h1>Welkom op je Dashboard! 🎉</h1>
+
+        <div class="container">
+            <!-- Weather Section -->
+            <div class="tile">
+                <h2>Weerbericht ☀️</h2>
+                <h3 id="weather-condition">Laden...</h3>
+                <p id="weather">Bezig met ophalen...</p>
+            </div>
+
+            <!-- Chores Section -->
+            <div class="tile">
+                <h2>Taakjes 🧹</h2>
+                <ul id="chores" class="chores-list"></ul>
+                <input type="text" id="newChore" placeholder="Voeg een klus toe ✍️">
+                <button class="add-chore-btn" onclick="addChore()">Voeg Taakje toe</button>
+            </div>
+
+            <!-- Google Calendar Embed Section -->
+            <div id="googleCalendar" class="tile">
+                <h2>Je Agenda 📅</h2>
+                <iframe src="https://calendar.google.com/calendar/embed?src=arvidvandorpe.werkmail%40gmail.com&ctz=Europe%2FBrussels" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+            </div>
+
+            <!-- Grocery List Section -->
+            <div class="tile">
+                <h2>Boodschappenlijst 🛒</h2>
+                <ul id="groceryList" class="chores-list"></ul>
+                <input type="text" id="newItem" placeholder="Voeg item toe aan boodschappenlijst 📝">
+                <button class="add-chore-btn" onclick="addGroceryItem()">Voeg item toe</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const validPassword = "Tienermoeder";
+
+        function checkPassword() {
+            let enteredPassword = prompt("Voer je wachtwoord in:");
+            if (enteredPassword === validPassword) {
+                document.getElementById("login").style.display = "none";
+                document.getElementById("dashboard").style.display = "block";
+                fetchWeather();
+                loadChores();
+                loadGroceryList();
+                loadGoogleAPI();
+            } else {
+                alert("Onjuist wachtwoord. Probeer het opnieuw.");
+            }
+        }
+
+        // Fetch weather details from API
+        async function fetchWeather() {
+            const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=51.0538&longitude=3.725&current_weather=true`;
+            const response = await fetch(weatherUrl);
+            const data = await response.json();
+            const temp = data.current_weather.temperature;
+            const weatherDescription = data.current_weather.weathercode;
+
+            const weatherDescriptions = {
+                0: '☀️🌞 Stralend Zonnig',
+                1: '🌤😎 Meestal Helder',
+                2: '⛅🌥 Gedeeltelijk Bewolkt',
+                3: '☁️🌫 Bewolkt en Somber',
+                45: '🌫🌁 Mistig Weer',
+                48: '🌫❄️ Dichte Koude Mist',
+                51: '🌦💧 Lichte Motregen',
+                53: '🌧💦 Matige Motregen',
+                55: '🌧🌊 Zware Motregen',
+                61: '🌧🌂 Lichte Regen – Pak je Paraplu!',
+                63: '🌧☔ Matige Regen – Regenjas Nodig!',
+                65: '🌧🌊 Zware Regen – Blijf Binnen?',
+                66: '🌨❄️ Lichte IJzel – Pas Op voor Gladde Wegen!',
+                67: '🌨⚠️ Zware IJzel – Rij Voorzichtig!',
+                71: '❄️☃️ Lichte Sneeuwval',
+                73: '❄️🌨 Matige Sneeuwval',
+                75: '❄️❄️ Hevige Sneeuwstorm!',
+                80: '🌦🌧 Lichte Regenbuien',
+                81: '⛈🌧 Matige Regenbuien',
+                82: '🌩💥 Zware Regenbuien en Onweer!',
+                85: '🌨❄️ Lichte Sneeuwbuien',
+                86: '🌨☃️ Heftige Sneeuwval!',
+            };
+
+            document.getElementById("weather-condition").innerText = weatherDescriptions[weatherDescription] || "Weerinformatie niet beschikbaar";
+            document.getElementById("weather").innerText = `${temp}°C — Het is ${temp < 10 ? 'jas' : 't-shirt'} weer!`;
+        }
+
+        // Adding new chore
+        function addChore() {
+            const choreText = document.getElementById('newChore').value;
+            if (choreText) {
+                const choreItem = document.createElement('li');
+                choreItem.innerHTML = `${choreText} <span class="delete" onclick="deleteChore(this)">❌</span>`;
+                document.getElementById('chores').appendChild(choreItem);
+                document.getElementById('newChore').value = ''; // Reset the input field
+            }
+        }
+
+        // Adding new chore on Enter key
+        document.getElementById('newChore').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                addChore();
+            }
+        });
+
+        // Delete chore from the list
+        function deleteChore(item) {
+            item.parentElement.remove();
+        }
+
+        // Adding new grocery item
+        function addGroceryItem() {
+            const itemText = document.getElementById('newItem').value;
+            if (itemText) {
+                const groceryItem = document.createElement('li');
+                groceryItem.innerHTML = `${itemText} <span class="delete" onclick="deleteGroceryItem(this)">❌</span>`;
+                document.getElementById('groceryList').appendChild(groceryItem);
+                document.getElementById('newItem').value = ''; // Reset the input field
+            }
+        }
+
+        // Adding new grocery item on Enter key
+        document.getElementById('newItem').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                addGroceryItem();
+            }
+        });
+
+        // Delete grocery item
+        function deleteGroceryItem(item) {
+            item.parentElement.remove();
+        }
+
+        // Initialize Google API
+        function loadGoogleAPI() {
+            gapi.load("client:auth2", () => {
+                gapi.client.init({
+                    apiKey: "AIzaSyBHtlxRh1tkb1pdIJOdsdnd2hyiOHoipAk", // Make sure you replace it with a valid API key
+                    clientId: "YOUR_GOOGLE_CLIENT_ID", 
+                    discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
+                    scope: "https://www.googleapis.com/auth/calendar.readonly"
+                }).then(() => {
+                    console.log("Google API geladen");
+                });
+            });
+        }
+    </script>
+</body>
+</html>
